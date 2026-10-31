@@ -1,5 +1,6 @@
 package com.example.c13102a1
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,8 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,6 +40,18 @@ fun getAgeGroup(age: Int): String {
         age in 18..59 -> "Adult"
         else -> "Senior"
     }
+}
+
+// Challenge 1 Session 2
+fun addFriend(friendList: MutableList<String>, friend: String) {
+    if (!friendList.contains(friend)) {
+        friendList.add(friend)
+    }
+}
+
+// Challenge 2 Session 2
+fun removeFriend(friendList: MutableList<String>, friend: String) {
+    friendList.remove(friend)
 }
 
 lateinit var onChangeUsername: (String) -> String
@@ -73,9 +90,12 @@ fun UserProfileScreen() {
             likesCount = like,
             isVerified,
             ageGroup,
+            friends = friends,
             // Challenge 4 Session 1
             onLike = { like ++ },
-            onChangeUsername = { username = "@newUser123" }
+            onChangeUsername = { username = "@newUser123" },
+            onAddFriend = { addFriend(friends, "Sophia" )},
+            onRemoveFriend = { removeFriend(friends, "Henry") },
         )
     }
 }
@@ -90,9 +110,14 @@ fun ProfileContent (
     likesCount: Int,
     isVerified: Boolean,
     ageGroup: String,
+    friends: List<String>,
     onLike: () -> Unit,
-    onChangeUsername: () -> Unit
+    onChangeUsername: () -> Unit,
+    onAddFriend: () -> Unit,
+    onRemoveFriend: () -> Unit,
 ){
+    var showFriends by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -132,15 +157,59 @@ fun ProfileContent (
         Text(text = "Likes: $likesCount",
             modifier = Modifier.padding(5.dp))
         Text(text = "Verified: ${if (isVerified) "Yes" else "No"}")
+        Text(text = "Age Group: $ageGroup",
+            modifier = Modifier.padding(5.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onLike) {
+                Icon(
+                    imageVector = Icons.Filled.ThumbUp,
+                    contentDescription = "Like"
+                )
+            }
+            Text(text = "$likesCount")
+        }
 
         Row {
-            Button(onClick = onLike) {
-                Text("Like")
-            }
+//            Button(onClick = onLike) {
+//                Text("Like")
+//            }
             // Challenge 6 Session 1
             Button(onClick = onChangeUsername) {
                 Text("Change Username")
             }
+        }
+
+        Row( modifier = Modifier
+            .fillMaxWidth()
+            .padding(20.dp, 0.dp, 20.dp)
+
+        ) {
+            Button(onClick = onRemoveFriend,
+                modifier = Modifier.weight(1f)) {
+                Text("Remove Friend")
+            }
+            Button(onClick = onAddFriend,
+                modifier = Modifier.weight(1f)) {
+                Text("Add Friend")
+            }
+        }
+
+        Button(onClick = {showFriends = !showFriends } ) {
+            Text(if(showFriends) "Hide Friends" else "Show Friends")
+        }
+
+        if (showFriends) {
+            Text(text = "Friends (${friends.size}):",
+                modifier = Modifier.padding(5.dp))
+            friends.forEach({ friend ->
+                Text(
+                    text = friend,
+                    modifier = Modifier.padding(5.dp)
+                )
+            })
         }
     }
 }
